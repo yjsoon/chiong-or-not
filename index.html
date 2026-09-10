@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0f14">
+<title>Chiong or not?</title>
+<style>
+  :root{
+    --bg:#0b0f14;
+    --card:#141b24;
+    --card2:#19222d;
+    --line:#243040;
+    --ink:#e8eef5;
+    --dim:#8ba0b8;
+    --accent:#8ba0b8;
+    --ok:#22c55e;
+    --warn:#fbbf24;
+    --bad:#ef4444;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+  }
+  main{max-width:520px;margin:0 auto;padding:18px 16px 40px}
+
+  /* ---- header ---- */
+  .route{display:flex;align-items:center;gap:12px}
+  .svc{
+    flex:none;background:#7c3aed;color:#fff;font-weight:900;font-size:22px;
+    padding:6px 12px;border-radius:10px;letter-spacing:.5px;
+  }
+  .ends{font-size:15px;line-height:1.3}
+  .ends b{font-weight:700}
+  .ends .arr{color:var(--dim);margin:0 4px}
+  .stopnote{
+    margin:12px 0 0;padding:10px 12px;border-radius:10px;
+    background:var(--card);border:1px solid var(--line);
+    font-size:13px;color:var(--dim);
+  }
+  .stopnote b{color:var(--ink)}
+
+  /* ---- hero ---- */
+  .hero{
+    margin:16px 0;padding:26px 18px 22px;border-radius:18px;text-align:center;
+    background:
+      radial-gradient(120% 100% at 50% 0%, color-mix(in srgb, var(--accent) 22%, transparent), transparent 70%),
+      var(--card);
+    border:1px solid color-mix(in srgb, var(--accent) 40%, var(--line));
+    transition:border-color .3s ease;
+  }
+  .verdict{
+    font-size:clamp(2.1rem,10.5vw,3.4rem);font-weight:900;line-height:1.02;
+    letter-spacing:-.02em;color:var(--accent);
+  }
+  .sub{margin-top:10px;font-size:15px;color:var(--ink);opacity:.9;min-height:2.6em}
+  .clockwrap{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+  .clocklabel{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim)}
+  .clock{font-size:44px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.01em;margin-top:2px}
+  .clock.gone{color:var(--dim)}
+
+  /* ---- chips ---- */
+  h2{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--dim);margin:22px 0 10px;font-weight:700}
+  .chip{
+    display:flex;align-items:center;gap:14px;
+    background:var(--card);border:1px solid var(--line);border-radius:12px;
+    padding:11px 14px;margin-bottom:8px;
+  }
+  .chip-eta{flex:none;width:64px;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+  .chip-eta span{font-size:12px;font-weight:600;color:var(--dim);margin-left:3px}
+  .chip-meta{flex:1;min-width:0;font-size:13px}
+  .chip-meta .load{font-weight:700}
+  .chip-meta .deck{display:block;color:var(--dim);font-size:12px}
+  .load-ok{color:var(--ok)} .load-warn{color:var(--warn)} .load-bad{color:var(--bad)}
+  .badge{
+    flex:none;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
+    padding:4px 8px;border-radius:99px;border:1px solid var(--line);color:var(--dim);
+  }
+  .badge.live{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+  .empty{color:var(--dim);font-size:14px;padding:4px 2px}
+
+  /* ---- controls ---- */
+  .presets{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+  .presets button{
+    flex:1 1 auto;min-width:96px;cursor:pointer;
+    background:var(--card);color:var(--ink);border:1px solid var(--line);
+    border-radius:10px;padding:9px 8px;font-size:12.5px;font-weight:600;font-family:inherit;
+  }
+  .presets button[aria-pressed="true"]{
+    background:var(--card2);border-color:#7c3aed;color:#fff;
+  }
+  .slider{margin-bottom:16px}
+  .slider label{display:flex;justify-content:space-between;align-items:baseline;font-size:14px;margin-bottom:6px}
+  .slider output{font-weight:800;font-variant-numeric:tabular-nums}
+  input[type=range]{
+    width:100%;-webkit-appearance:none;appearance:none;background:transparent;margin:0;height:26px;
+  }
+  input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:99px;background:var(--line)}
+  input[type=range]::-moz-range-track{height:6px;border-radius:99px;background:var(--line)}
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;width:24px;height:24px;border-radius:50%;
+    background:#7c3aed;border:3px solid var(--bg);margin-top:-9px;cursor:pointer;
+  }
+  input[type=range]::-moz-range-thumb{
+    width:20px;height:20px;border-radius:50%;background:#7c3aed;border:3px solid var(--bg);cursor:pointer;
+  }
+
+  /* ---- footer ---- */
+  footer{margin-top:26px;border-top:1px solid var(--line);padding-top:14px;font-size:12px;color:var(--dim)}
+  footer p{margin:0 0 6px}
+  footer a{color:var(--dim)}
+  #status{font-weight:600}
+  #status.err{color:var(--warn)}
+  .stale{opacity:.45;transition:opacity .3s}
+</style>
+</head>
+<body>
+<main>
+  <div class="route">
+    <span class="svc">13</span>
+    <div class="ends"><b>Aperia Mall</b><span class="arr">&#10142;</span><b>Yio Chu Kang Int</b><br>
+      <span style="color:var(--dim);font-size:13px">30 stops, about 45 min. Bring something to watch.</span>
+    </div>
+  </div>
+  <p class="stopnote">Board at <b>Aft Kallang Rd</b> &mdash; the one ACROSS the road hor, not the one outside Aperia. Don&rsquo;t anyhow whack.</p>
+
+  <section class="hero" id="hero">
+    <div class="verdict" id="verdict">WAIT AH&hellip;</div>
+    <div class="sub" id="sub">Asking LTA nicely, hold on.</div>
+    <div class="clockwrap">
+      <div class="clocklabel" id="clocklabel">bus 13 reaching in</div>
+      <div class="clock" id="clock">--:--</div>
+    </div>
+  </section>
+
+  <h2>Next few 13s</h2>
+  <div id="chips"><p class="empty">Loading&hellip;</p></div>
+
+  <h2>You where now?</h2>
+  <div class="presets" id="presets"></div>
+  <div class="slider">
+    <label for="walk">Walk how long? <output id="walkOut">4.0 min</output></label>
+    <input type="range" id="walk" min="0.5" max="12" step="0.5" value="4">
+  </div>
+  <div class="slider">
+    <label for="run">Chiong how long? <output id="runOut">2.5 min</output></label>
+    <input type="range" id="run" min="0.5" max="12" step="0.5" value="2.5">
+  </div>
+
+  <footer>
+    <p id="status">&nbsp;</p>
+    <p>Auto-update every 15s. Don&rsquo;t keep tapping, the API also need to breathe.</p>
+    <p>Data from <a href="https://busrouter.sg" target="_blank" rel="noopener">arrivelah / busrouter.sg</a>. Free one, say thank you. &#128591;</p>
+  </footer>
+</main>
+
+<script>
+(function(){
+  'use strict';
+
+  var STOP = '07371';
+  var SERVICE = '13';
+  var API = 'https://arrivelah2.busrouter.sg/?id=' + STOP;
+  var POLL_MS = 15000;
+  var BUFFER = 60;      // seconds of cushion at the stop
+  var CLOSE_GAP = 300;  // next bus within 5 min => not worth chionging
+
+  var LOAD = {
+    SEA: {txt:'got seat, shiok 🪑', cls:'load-ok'},
+    SDA: {txt:'must stand, sian 🧍', cls:'load-warn'},
+    LSD: {txt:'sardine packed, jialat 🥫', cls:'load-bad'}
+  };
+  var DECK = { SD:'single deck only lah', DD:'double decker — upstairs front seat', BD:'bendy bus, the accordion one' };
+
+  var PRESETS = [
+    {label:'Already outside, steady', walk:2,   run:1.5},
+    {label:'Inside mall lepak-ing',   walk:4,   run:2.5},
+    {label:'Basement carpark, blur',  walk:6,   run:4}
+  ];
+
+  var VERDICTS = {
+    steady:  {big:'STEADY LAH',        accent:'#22c55e'},
+    chiong:  {big:'CHIONG AH!!!',      accent:'#ef4444'},
+    relak:   {big:'RELAK LA BROTHER',  accent:'#38bdf8'},
+    gg:      {big:'GG. BUS GONE.',     accent:'#a78bfa'},
+    there:   {big:'IT IS THERE NOW',   accent:'#facc15'},
+    agak:    {big:'AGAK AGAK ONLY',    accent:'#fbbf24'},
+    nobus:   {big:'NO BUS LEH',        accent:'#8ba0b8'},
+    offline: {big:'WALAO, NO SIGNAL',  accent:'#8ba0b8'},
+    loading: {big:'WAIT AH…',     accent:'#8ba0b8'}
+  };
+
+  var $ = function(id){ return document.getElementById(id); };
+  var qs = new URLSearchParams(location.search);
+  var MOCK = qs.get('mock');
+
+  var state = { buses:[], fetchedAt:0, error:null, everLoaded:false };
+  var cfg = { walk:4, run:2.5 };
+
+  // ---------- settings persistence ----------
+  function loadCfg(){
+    try{
+      var raw = localStorage.getItem('chiong-cfg');
+      if(raw){ var o = JSON.parse(raw); if(o && o.walk) cfg.walk = o.walk; if(o && o.run) cfg.run = o.run; }
+    }catch(e){ /* private mode, never mind */ }
+  }
+  function saveCfg(){
+    try{ localStorage.setItem('chiong-cfg', JSON.stringify(cfg)); }catch(e){}
+  }
+
+  // ---------- data ----------
+  // Turn one arrivelah entry into a bus with an absolute local deadline, so the
+  // countdown never depends on the device clock agreeing with the server clock.
+  function toBus(entry, now){
+    if(!entry) return null;
+    var ms = Number(entry.duration_ms);
+    if(!isFinite(ms)) return null;
+    return {
+      deadline: now + ms,
+      monitored: entry.monitored === 1 || entry.monitored === true,
+      load: entry.load,
+      type: entry.type
+    };
+  }
+
+  function parse(json, now){
+    var svc = null, list = (json && json.services) || [];
+    for(var i=0;i<list.length;i++){ if(list[i].no === SERVICE){ svc = list[i]; break; } }
+    if(!svc) return [];
+    // NOTE: `subsequent` is a duplicate of `next2` in this feed. Ignore it.
+    return [svc.next, svc.next2, svc.next3].map(function(e){ return toBus(e, now); })
+      .filter(Boolean)
+      .sort(function(a,b){ return a.deadline - b.deadline; });
+  }
+
+  function applyOverrides(buses, now){
+    var e1 = qs.get('eta'), e2 = qs.get('eta2'), m = qs.get('monitored');
+    if(e1 !== null){
+      if(!buses[0]) buses[0] = {load:'SEA', type:'SD', monitored:true};
+      buses[0].deadline = now + Number(e1)*1000;
+    }
+    if(e2 !== null){
+      if(!buses[1]) buses[1] = {load:'SEA', type:'SD', monitored:true};
+      buses[1].deadline = now + Number(e2)*1000;
+    }
+    if(m !== null && buses[0]) buses[0].monitored = (m === '1');
+    return buses;
+  }
+
+  function mockBuses(now){
+    var mk = function(secs, monitored, load, type){
+      return {deadline: now + secs*1000, monitored:monitored, load:load||'SEA', type:type||'DD'};
+    };
+    switch(MOCK){
+      // sized against the default 4 min walk / 2.5 min run preset
+      case 'steady': return [mk(600,true,'SEA','DD'), mk(1500,true,'SDA','SD'), mk(2100,true,'SEA','SD')];
+      case 'chiong': return [mk(240,true,'SDA','SD'), mk(960,true,'SEA','DD')];
+      case 'relak':  return [mk(240,true,'SEA','SD'), mk(420,true,'SEA','DD')];
+      case 'gg':     return [mk(60,true,'LSD','SD')];
+      case 'there':  return [mk(-20,true,'SEA','DD'), mk(720,true,'SEA','SD')];
+      case 'agak':   return [mk(240,false,'SEA','SD'), mk(1200,false,'SEA','SD')];
+      case 'nobus':  return [];
+      default:       return [];
+    }
+  }
+
+  function fetchNow(){
+    if(MOCK){
+      var now = Date.now();
+      if(MOCK === 'offline'){
+        state.error = 'mock offline'; state.everLoaded = true;
+        if(!state.fetchedAt) state.fetchedAt = now - 47000;
+      }else{
+        state.buses = applyOverrides(mockBuses(now), now);
+        state.fetchedAt = now; state.error = null; state.everLoaded = true;
+      }
+      render();
+      return;
+    }
+    fetch(API, {cache:'no-store'})
+      .then(function(r){ if(!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(json){
+        var now = Date.now();
+        state.buses = applyOverrides(parse(json, now), now);
+        state.fetchedAt = now;
+        state.error = null;
+        state.everLoaded = true;
+        render();
+      })
+      .catch(function(err){
+        state.error = err && err.message ? err.message : 'network died';
+        state.everLoaded = true;
+        render();
+      });
+  }
+
+  // ---------- the actual decision ----------
+  function etaOf(bus, now){ return (bus.deadline - now) / 1000; }
+
+  function decide(buses, walkS, runS, now, missedOne){
+    if(!buses.length) return {key: missedOne ? 'gg' : 'nobus', missed:missedOne, bus:null};
+
+    var first = buses[0];
+    var eta = etaOf(first, now);
+    var gap = buses[1] ? (etaOf(buses[1], now) - eta) : Infinity;
+
+    // Bus is at the stop, or has just pulled away.
+    if(eta <= 0){
+      if(walkS <= 75 && !missedOne) return {key:'there', bus:first, eta:eta};
+      return decide(buses.slice(1), walkS, runS, now, missedOne || first);
+    }
+
+    // No GPS behind this one, it is a timetable guess. Never tell anyone to sprint for it.
+    if(!first.monitored){
+      if(eta >= walkS + BUFFER) return {key:'steady', bus:first, eta:eta, spare:eta - walkS - BUFFER, missed:missedOne};
+      return {key:'agak', bus:first, eta:eta, missed:missedOne};
+    }
+
+    if(eta >= walkS + BUFFER) return {key:'steady', bus:first, eta:eta, spare:eta - walkS - BUFFER, missed:missedOne};
+    if(eta >= runS + BUFFER){
+      if(gap < CLOSE_GAP) return {key:'relak', bus:first, eta:eta, gap:gap, missed:missedOne};
+      return {key:'chiong', bus:first, eta:eta, missed:missedOne};
+    }
+    // Cannot make this one. So what about the one behind it?
+    return decide(buses.slice(1), walkS, runS, now, missedOne || first);
+  }
+
+  // ---------- copy ----------
+  function mins(secs){ return Math.max(0, Math.round(secs/60)); }
+  function plural(n){ return n === 1 ? '' : 's'; }
+
+  function subLine(d, now){
+    var n;
+    switch(d.key){
+      case 'steady':
+        n = mins(d.spare);
+        if(d.missed) return 'The first one confirm cannot catch, but the next one steady. ' +
+          (n < 1 ? 'Just nice, don’t dawdle.' : n + ' min' + plural(n) + ' to spare.');
+        return n < 1 ? 'Just nice only. Walk normal, don’t stop for kopi.'
+                     : 'Got ' + n + ' min' + plural(n) + ' to spare. Go Toast Box grab kopi first also can.';
+      case 'chiong':
+        return (d.missed ? 'First one gone already. For the next one: r' : 'R') +
+               'un now, or explain to your mother why you late again.';
+      case 'relak':
+        n = mins(d.gap);
+        return 'Next one only ' + n + ' min' + plural(n) + ' behind. Chiong for what?';
+      case 'gg':
+        return 'Bo bian, that one you cannot catch, and after that nothing else coming. Grab lor.';
+      case 'there':
+        return 'Bus at the stop already. Wave at uncle! Wave!';
+      case 'agak':
+        return 'No GPS on this one, timetable guess only. Don’t chiong for a maybe.';
+      case 'nobus':
+        return 'No bus 13 coming right now. Grab lor. 😭';
+      case 'offline':
+        n = state.fetchedAt ? Math.round((now - state.fetchedAt)/1000) : 0;
+        return 'Cannot reach the bus API' + (state.fetchedAt ? ', last checked ' + n + 's ago' : '') +
+               '. Your telco steady bom pi pi ah.';
+      default:
+        return 'Asking LTA nicely, hold on.';
+    }
+  }
+
+  function clockText(secs){
+    if(secs <= 0) return 'NOW';
+    var m = Math.floor(secs/60), s = Math.floor(secs%60);
+    return m + ':' + (s<10?'0':'') + s;
+  }
+
+  // ---------- render ----------
+  function render(){
+    var now = Date.now();
+    var walkS = cfg.walk*60, runS = cfg.run*60;
+
+    var d;
+    if(!state.everLoaded)                       d = {key:'loading'};
+    else if(state.error && !state.buses.length) d = {key:'offline'};
+    else                                        d = decide(state.buses, walkS, runS, now);
+
+    var v = VERDICTS[d.key] || VERDICTS.loading;
+    document.documentElement.style.setProperty('--accent', v.accent);
+    $('verdict').textContent = v.big;
+    $('sub').textContent = subLine(d, now);
+
+    // the countdown always tracks whichever bus the verdict is actually about
+    var clock = $('clock'), label = $('clocklabel');
+    if(d.bus){
+      var eta = etaOf(d.bus, now);
+      clock.textContent = clockText(eta);
+      clock.classList.toggle('gone', eta <= 0);
+      label.textContent = d.missed ? 'the NEXT 13 reaching in' : 'bus 13 reaching in';
+    }else{
+      clock.textContent = '--:--';
+      clock.classList.remove('gone');
+      label.textContent = 'bus 13 reaching in';
+    }
+
+    // stale data still counts down, but it looks faded so you know
+    $('hero').classList.toggle('stale', !!state.error && !state.buses.length);
+
+    renderChips(now);
+
+    var st = $('status');
+    if(state.error){
+      st.textContent = 'Cannot connect — ' + state.error + '. Still trying.';
+      st.className = 'err';
+    }else if(state.fetchedAt){
+      st.textContent = 'Updated ' + Math.round((now - state.fetchedAt)/1000) + 's ago.';
+      st.className = '';
+    }
+  }
+
+  function renderChips(now){
+    var box = $('chips');
+    if(!state.everLoaded) return;
+    if(!state.buses.length){
+      // "nothing coming" and "cannot check" are not the same thing
+      box.innerHTML = state.error
+        ? '<p class="empty">Cannot check now, no signal. Bus 13 still out there somewhere.</p>'
+        : '<p class="empty">Nothing coming. Bus 13 also need to rest.</p>';
+      return;
+    }
+    var html = '';
+    for(var i=0;i<state.buses.length;i++){
+      var b = state.buses[i];
+      var eta = etaOf(b, now);
+      var l = LOAD[b.load] || {txt:'crowd unknown', cls:''};
+      var deck = DECK[b.type] || 'bus lor';
+      html += '<div class="chip">' +
+        '<div class="chip-eta">' + (eta <= 0 ? 'now' : mins(eta) + '<span>min</span>') + '</div>' +
+        '<div class="chip-meta"><span class="load ' + l.cls + '">' + l.txt + '</span>' +
+        '<span class="deck">' + deck + '</span></div>' +
+        '<div class="badge' + (b.monitored ? ' live' : '') + '">' + (b.monitored ? 'live' : 'agak agak') + '</div>' +
+      '</div>';
+    }
+    box.innerHTML = html;
+  }
+
+  // ---------- controls ----------
+  function syncControls(){
+    $('walk').value = cfg.walk;
+    $('run').value = cfg.run;
+    $('walkOut').textContent = cfg.walk.toFixed(1) + ' min';
+    $('runOut').textContent = cfg.run.toFixed(1) + ' min';
+    var btns = $('presets').children;
+    for(var i=0;i<btns.length;i++){
+      var p = PRESETS[i];
+      btns[i].setAttribute('aria-pressed', (p.walk === cfg.walk && p.run === cfg.run) ? 'true' : 'false');
+    }
+  }
+
+  function buildPresets(){
+    var box = $('presets');
+    PRESETS.forEach(function(p){
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = p.label;
+      b.addEventListener('click', function(){
+        cfg.walk = p.walk; cfg.run = p.run;
+        saveCfg(); syncControls(); render();
+      });
+      box.appendChild(b);
+    });
+  }
+
+  function onSlide(){
+    cfg.walk = parseFloat($('walk').value);
+    cfg.run = parseFloat($('run').value);
+    // chionging can never be slower than walking
+    if(cfg.run > cfg.walk){ cfg.run = cfg.walk; $('run').value = cfg.run; }
+    saveCfg(); syncControls(); render();
+  }
+
+  // ---------- boot ----------
+  loadCfg();
+  if(MOCK === 'there'){ cfg.walk = 0.5; cfg.run = 0.5; }   // so the branch is reachable
+  buildPresets();
+  syncControls();
+  $('walk').addEventListener('input', onSlide);
+  $('run').addEventListener('input', onSlide);
+
+  fetchNow();
+  setInterval(render, 500);
+  if(!MOCK){
+    setInterval(fetchNow, POLL_MS);
+    document.addEventListener('visibilitychange', function(){
+      if(!document.hidden) fetchNow();   // back from pocket, get fresh numbers
+    });
+  }
+})();
+</script>
+</body>
+</html>
