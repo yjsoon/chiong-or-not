@@ -87,8 +87,9 @@
   .scene[data-mood="there"] .armB{animation:wave .45s ease-in-out infinite}
   .scene[data-mood="gg"] .personInner{transform:rotate(5deg)}
   .scene[data-mood="gg"] .head{transform:translateY(3px)}
-  /* a guess, not a bus: draw it like a ghost */
-  .scene[data-mood="agak"] .bus{opacity:.35}
+  /* a guess, not a bus: draw it like a ghost. Keyed off the bus itself, not the
+     verdict, because an unmonitored bus can still be far enough away to read steady. */
+  .scene .bus.ghost{opacity:.35}
   /* no bus at all beats any of the above */
   .scene .bus.gone{opacity:0 !important}
 
@@ -583,6 +584,7 @@
     scene.setAttribute('data-mood', d.key);
     // opacity stays in CSS so the agak-agak ghosting is not fought by an inline style
     bus.classList.toggle('gone', !d.bus);
+    bus.classList.toggle('ghost', !!(d.bus && !d.bus.monitored));
     var eta = d.bus ? Math.max(0, etaOf(d.bus, now)) : SCENE_FAR;
     var x = BUS_HOME + Math.min(1, eta / SCENE_FAR) * (BUS_AWAY - BUS_HOME);
     bus.style.transform = 'translateX(' + x.toFixed(1) + 'px)';
