@@ -38,6 +38,21 @@ With `eta` = seconds until arrival, `walk`/`run` = your configured times, `BUFFE
 That last row matters. Some entries in the feed are timetable estimates with no bus actually
 being tracked (`monitored: 0`). Sprinting for a guess is a mug's game, so the app won't suggest it.
 
+## The little scene
+
+Above the verdict there's an animated bus stop, so you can tell what's happening without even
+reading the words. Inline SVG, no library, no images.
+
+- **The bus slides along the road in proportion to its real ETA** — off the right edge at
+  15 min out, pulled up beside you at zero.
+- **CHIONG AH** → the fella leans forward and starts running, dust and all.
+- **IT IS THERE NOW** → he waves at the uncle.
+- **AGAK AGAK ONLY** → the bus is drawn as a see-through ghost, because that one is a guess,
+  not a bus.
+- **GG / no bus** → empty road, and he droops.
+
+Respects `prefers-reduced-motion`, so animations switch off if your system asks for that.
+
 ## Walk time
 
 No GPS — you're indoors, where position error is 50–100 m, which is ±1.2 min of noise on a
