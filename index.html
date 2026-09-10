@@ -323,7 +323,14 @@
 
     if(eta >= walkS + BUFFER) return {key:'steady', bus:first, eta:eta, spare:eta - walkS - BUFFER, missed:missedOne};
     if(eta >= runS + BUFFER){
-      if(gap < CLOSE_GAP) return {key:'relak', bus:first, eta:eta, gap:gap, missed:missedOne};
+      // Only tell someone not to bother if the bus behind is one they can actually
+      // stroll to, and it is a real tracked bus rather than a timetable guess.
+      // Otherwise bunched buses would strand them: relak, then miss both.
+      var second = buses[1];
+      var worthSkipping = second && second.monitored &&
+                          etaOf(second, now) >= walkS + BUFFER &&
+                          gap < CLOSE_GAP;
+      if(worthSkipping) return {key:'relak', bus:first, eta:eta, gap:gap, missed:missedOne};
       return {key:'chiong', bus:first, eta:eta, missed:missedOne};
     }
     // Cannot make this one. So what about the one behind it?
